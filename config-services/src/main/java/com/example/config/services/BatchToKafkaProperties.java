@@ -9,6 +9,9 @@ import java.util.List;
 @Data
 @Configuration
 @ConfigurationProperties(prefix = "batch-to-kafka-service")
-public class BatchToKafkaConfig {
+public class BatchToKafkaProperties {
     private List<String> twitterKeywords;
+    private Integer mockMinTweetLength;
+    private Integer mockMaxTweetLength;
+    private Integer mockSleepMs;
 }

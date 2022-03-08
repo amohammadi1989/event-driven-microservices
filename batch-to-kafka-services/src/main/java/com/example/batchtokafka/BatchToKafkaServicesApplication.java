@@ -1,7 +1,7 @@
 package com.example.batchtokafka;
 
 import com.example.batchtokafka.services.runner.StreamRunner;
-import com.example.config.services.BatchToKafkaConfig;
+import com.example.config.services.BatchToKafkaProperties;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -13,10 +13,10 @@ import java.util.Arrays;
 @ComponentScan(basePackages = "com.example")
 public class BatchToKafkaServicesApplication implements CommandLineRunner {
 
-    private final BatchToKafkaConfig batchToKafkaConfig;
+    private final BatchToKafkaProperties batchToKafkaConfig;
     private final StreamRunner streamRunner;
 
-    public BatchToKafkaServicesApplication(BatchToKafkaConfig config,
+    public BatchToKafkaServicesApplication(BatchToKafkaProperties config,
                                            StreamRunner runner) {
         this.batchToKafkaConfig = config;
         this.streamRunner=runner;

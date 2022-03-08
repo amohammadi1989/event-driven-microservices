@@ -2,7 +2,7 @@ package com.example.batchtokafka.services.runner.impl;
 
 import com.example.batchtokafka.services.listener.BatchKafkaStatusListener;
 import com.example.batchtokafka.services.runner.StreamRunner;
-import com.example.config.services.BatchToKafkaConfig;
+import com.example.config.services.BatchToKafkaProperties;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 import twitter4j.FilterQuery;
@@ -13,16 +13,16 @@ import java.text.MessageFormat;
 import java.util.Arrays;
 
 @Component
-@ConditionalOnProperty(name="twitter-to-kafka-service.enable-mock-tweets",havingValue = "false",matchIfMissing = true)
+@ConditionalOnProperty(name="batch-to-kafka-service.enable-mock-tweets",havingValue = "false",matchIfMissing = true)
 public class BatchToKafkaStreamRunner implements StreamRunner {
 
-    private final BatchToKafkaConfig batchToKafkaConfig;
+    private final BatchToKafkaProperties BatchToKafkaProperties;
     private final BatchKafkaStatusListener batchKafkaStatusListener;
     private final TwitterStream twitterStream = TwitterStreamFactory.getSingleton();
 
-    public BatchToKafkaStreamRunner(BatchToKafkaConfig batchToKafkaConfig,
+    public BatchToKafkaStreamRunner(BatchToKafkaProperties BatchToKafkaProperties,
                                     BatchKafkaStatusListener batchKafkaStatusListener) {
-        this.batchToKafkaConfig = batchToKafkaConfig;
+        this.BatchToKafkaProperties = BatchToKafkaProperties;
         this.batchKafkaStatusListener = batchKafkaStatusListener;
     }
 
@@ -30,7 +30,7 @@ public class BatchToKafkaStreamRunner implements StreamRunner {
     public void start()
     {
         twitterStream.addListener(batchKafkaStatusListener);
-        String[] keywords=batchToKafkaConfig.getTwitterKeywords().toArray(new String[0]);
+        String[] keywords=BatchToKafkaProperties.getTwitterKeywords().toArray(new String[0]);
         FilterQuery filterQuery=new FilterQuery(keywords);
         twitterStream.filter(filterQuery);
         String out=MessageFormat.format("Started filtered twitter steam for keywords{0}",
