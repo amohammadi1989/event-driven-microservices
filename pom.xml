@@ -9,6 +9,7 @@
 	</parent>
 	<modules>
 		<module>batch-to-kafka-services</module>
+		<module>config-services</module>
 	</modules>
 	<groupId>com.example</groupId>
 	<artifactId>microservices</artifactId>
@@ -21,6 +22,7 @@
 		<spring-boot.version>2.6.4</spring-boot.version>
 		<twitter4j.version>4.0.7</twitter4j.version>
 		<lombok.version>1.18.22</lombok.version>
+		<version.project>1.0</version.project>
 	</properties>
 	<dependencyManagement>
 		<dependencies>
@@ -30,6 +32,11 @@
 				<version>${spring-boot.version}</version>
 			</dependency>
 			<dependency>
+				<groupId>com.example</groupId>
+				<artifactId>config-services</artifactId>
+				<version>${version.project}</version>
+			</dependency>
+			<dependency>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-starter</artifactId>
 				<version>${spring-boot.version}</version>
@@ -37,7 +44,6 @@
 			<dependency>
 				<groupId>org.projectlombok</groupId>
 				<artifactId>lombok</artifactId>
-
 				<version>${lombok.version}</version>
 			</dependency>
 			<dependency>

@@ -1,4 +1,4 @@
-package com.example.batchtokafka.services.config;
+package com.example.config.services;
 
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;

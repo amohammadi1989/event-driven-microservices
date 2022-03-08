@@ -1,8 +1,8 @@
 package com.example.batchtokafka.services.runner.impl;
 
-import com.example.batchtokafka.services.config.BatchToKafkaConfig;
 import com.example.batchtokafka.services.listener.BatchKafkaStatusListener;
 import com.example.batchtokafka.services.runner.StreamRunner;
+import com.example.config.services.BatchToKafkaConfig;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 import twitter4j.FilterQuery;

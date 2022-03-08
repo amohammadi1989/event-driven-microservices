@@ -8,10 +8,10 @@
         <version>1.0</version>
     </parent>
     <groupId>com.example</groupId>
-    <artifactId>batch-to-kafka-services</artifactId>
+    <artifactId>config-services</artifactId>
     <version>1.0</version>
-    <name>batch-to-kafka-services</name>
-    <description>batch-to-kafka-services</description>
+    <name>config-services</name>
+    <description>config</description>
     <properties>
         <java.version>11</java.version>
     </properties>
@@ -21,23 +21,17 @@
             <artifactId>spring-boot-starter</artifactId>
         </dependency>
         <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+        </dependency>
+
+        <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
         </dependency>
-        <dependency>
-            <groupId>org.twitter4j</groupId>
-            <artifactId>twitter4j-stream</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.example</groupId>
-            <artifactId>config-services</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.projectlombok</groupId>
-            <artifactId>lombok</artifactId>
-        </dependency>
     </dependencies>
+
     <build>
         <plugins>
             <plugin>
@@ -46,4 +40,5 @@
             </plugin>
         </plugins>
     </build>
+
 </project>
