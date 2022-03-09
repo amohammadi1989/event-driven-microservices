@@ -1,7 +1,7 @@
 version: '3.7'
 services:
   zookeeper:
-    image: zookeeper:${KAFKA_VERSION:-latest}
+    image: confluentinc/cp-zookeeper:${KAFKA_VERSION:-latest}
     hostname: zookeeper
     ports:
       - "2181:2181"
@@ -13,7 +13,7 @@ services:
       ZOOKEEPER_SYNC_LIMIT: 2
       ZOOKEEPER_SERVERS: zookeeper:2888:3888
   schema-registry:
-    image: confluent/schema-registry
+    image: confluentinc/cp-schema-registry:${KAFKA_VERSION}
     hostname: schema-registry
     depends_on:
       - zookeeper
@@ -28,7 +28,7 @@ services:
       SCHEMA_REGISTRY_LISTENERS: http://schema-registry:8081
       SCHEMA_REGISTRY_DEBUG: 'true'
   kafka-broker-1:
-    image: bitnami/kafka:latest
+    image: confluentinc/cp-kafka:${KAFKA_VERSION}
     hostname: kafka-broker-1
     ports:
       - "19092:19092"
@@ -42,7 +42,7 @@ services:
       KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
       KAFKA_COMPRESSION_TYPE: producer
   kafka-broker-2:
-    image: bitnami/kafka:latest
+    image: confluentinc/cp-kafka:${KAFKA_VERSION}
     hostname: kafka-broker-2
     ports:
       - "29092:29092"
@@ -56,7 +56,7 @@ services:
       KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
       KAFKA_COMPRESSION_TYPE: producer
   kafka-broker-3:
-    image: bitnami/kafka:latest
+    image: confluentinc/cp-kafka:${KAFKA_VERSION}
     hostname: kafka-broker-3
     ports:
       - "39092:39092"
