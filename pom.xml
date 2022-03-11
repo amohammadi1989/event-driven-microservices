@@ -10,6 +10,7 @@
 	<modules>
 		<module>batch-to-kafka-services</module>
 		<module>config-services</module>
+		<module>config-kafka</module>
 	</modules>
 	<groupId>com.example</groupId>
 	<artifactId>microservices</artifactId>
