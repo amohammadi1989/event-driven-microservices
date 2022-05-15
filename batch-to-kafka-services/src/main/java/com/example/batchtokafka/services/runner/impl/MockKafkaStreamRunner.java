@@ -4,6 +4,7 @@ import com.example.batchtokafka.services.listener.BatchKafkaStatusListener;
 import com.example.batchtokafka.services.runner.StreamRunner;
 import com.example.config.services.BatchToKafkaProperties;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Component;
 import twitter4j.Status;
 import twitter4j.TwitterException;
@@ -18,7 +19,8 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadLocalRandom;
 
 @Component
-@ConditionalOnProperty(name="batch-to-kafka-service.enable-mock-tweets",havingValue = "true",matchIfMissing = true)
+@ConditionalOnProperty(name="batch-to-kafka-service.enable-mock-tweets",havingValue = "true",
+matchIfMissing = true)
 public class MockKafkaStreamRunner implements StreamRunner {
 
     private final BatchToKafkaProperties BatchToKafkaProperties;

@@ -12,8 +12,9 @@ import twitter4j.TwitterStreamFactory;
 import java.text.MessageFormat;
 import java.util.Arrays;
 
-@Component
-@ConditionalOnProperty(name="batch-to-kafka-service.enable-mock-tweets",havingValue = "false",matchIfMissing = true)
+//@Component
+//@ConditionalOnProperty(name="batch-to-kafka-service.enable-mock-tweets",havingValue = "false",
+//matchIfMissing = true)
 public class BatchToKafkaStreamRunner implements StreamRunner {
 
     private final BatchToKafkaProperties BatchToKafkaProperties;
