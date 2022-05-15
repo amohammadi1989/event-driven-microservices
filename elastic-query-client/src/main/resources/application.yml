@@ -1,0 +1,7 @@
+spring:
+  profiles:
+    active: config-client-elastic_query_client
+  cloud:
+    config:
+      name:  config-client-elastic_query_client
+      uri: http://localhost:8888
