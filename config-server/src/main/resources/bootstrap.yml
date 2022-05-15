@@ -1,0 +1,10 @@
+spring:
+  application:
+    name: configserver
+  cloud:
+    config:
+      server:
+        git:
+          uri: file://K:/udemy/event-driven-microservices/event-driven-microservices/config-server-repository
+          clone-on-start: true
+      fail-fast: true

@@ -1,0 +1,2 @@
+1.change max limit window of elastic of index with below command:
+curl -X PUT -H "Content-Type: application/json" -d "{\"index\":{\"max_result_window\":100000}}" http://localhost:9200/twitter-index/_settings
