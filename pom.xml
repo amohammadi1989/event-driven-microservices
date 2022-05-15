@@ -5,13 +5,19 @@
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>2.6.4</version>
+		<version>2.3.4.RELEASE</version>
 	</parent>
 	<modules>
 		<module>batch-to-kafka-services</module>
 		<module>config-services</module>
 		<module>config-kafka</module>
-	</modules>
+		<module>config-server</module>
+		<module>kafka-to-elastic-services</module>
+		<module>config-elastic</module>
+		<module>elastic-query-client</module>
+        <module>service-registry</module>
+		<module>gateway-services</module>
+    </modules>
 	<groupId>com.example</groupId>
 	<artifactId>microservices</artifactId>
 	<version>1.0</version>
@@ -20,12 +26,20 @@
 	<description>Microservices project for Spring Boot</description>
 	<properties>
 		<java.version>11</java.version>
-		<spring-boot.version>2.6.4</spring-boot.version>
+		<spring-boot.version>2.3.4.RELEASE</spring-boot.version>
 		<twitter4j.version>4.0.7</twitter4j.version>
 		<lombok.version>1.18.22</lombok.version>
 		<version.project>1.0</version.project>
 		<avro.version>1.11.0</avro.version>
+		<version.confluent>5.3.0</version.confluent>
 		<spring-kafka.version>2.6.2</spring-kafka.version>
+		<spring-data-elasticsearch.version>4.0.0.RELEASE</spring-data-elasticsearch.version>
+		<spring-cloud-starter-config.version> 2.3.RELEASE</spring-cloud-starter-config.version>
+		<elasticsearch.version>7.6.2</elasticsearch.version>
+		<spring-cloud-resilience4j.version>2.0.2</spring-cloud-resilience4j.version>
+		<keycloak-spring-boot-starter.version>13.0.1</keycloak-spring-boot-starter.version>
+		<spring-boot-starter-oauth2-resource-server.version>2.6.2
+		</spring-boot-starter-oauth2-resource-server.version>
 	</properties>
 	<dependencyManagement>
 		<dependencies>
@@ -35,9 +49,116 @@
 				<version>${spring-boot.version}</version>
 			</dependency>
 			<dependency>
+				<groupId>org.keycloak</groupId>
+				<artifactId>keycloak-spring-boot-starter</artifactId>
+				<version>13.0.1</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.springframework.cloud</groupId>
+				<artifactId>spring-cloud-config-server</artifactId>
+				<version>${spring-cloud-starter-config.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-starter-actuator</artifactId>
+				<version>${spring-boot.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.springframework.data</groupId>
+				<artifactId>spring-data-elasticsearch</artifactId>
+				<version>${spring-data-elasticsearch.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.elasticsearch</groupId>
+				<artifactId>elasticsearch</artifactId>
+				<version>${elasticsearch.version}</version>
+			</dependency>
+
+
+			<dependency>
+				<groupId>org.springframework.cloud</groupId>
+				<artifactId>spring-cloud-starter-config</artifactId>
+				<version>${spring-cloud-starter-config.version}</version>
+			</dependency>
+
+
+	<!--		<dependency>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-starter-oauth2-resource-server</artifactId>
+				<version>${spring-boot-starter-oauth2-resource-server.version}</version>
+			</dependency>-->
+			<dependency>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-starter-aop</artifactId>
+				<version>${spring-boot.version}</version>
+			</dependency>
+<!--			<dependency>
+				<groupId>org.keycloak</groupId>
+				<artifactId>keycloak-spring-boot-starter</artifactId>
+			</dependency>-->
+			<dependency>
+				<groupId>org.springframework.data</groupId>
+				<artifactId>spring-data-elasticsearch</artifactId>
+				<version>${spring-data-elasticsearch.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.springframework.cloud</groupId>
+				<artifactId>spring-cloud-starter-netflix-eureka-client</artifactId>
+				<version>${spring-cloud-starter-config.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.springframework.cloud</groupId>
+				<artifactId>spring-cloud-starter-eureka</artifactId>
+				<version>${spring-boot.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.springframework.cloud</groupId>
+				<artifactId>spring-cloud-starter-circuitbreaker-reactor-resilience4j</artifactId>
+				<version>${spring-cloud-resilience4j.version}</version>
+			</dependency>
+			<dependency>
 				<groupId>org.springframework.kafka</groupId>
 				<artifactId>spring-kafka</artifactId>
 				<version>${spring-kafka.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>io.confluent</groupId>
+				<artifactId>kafka-schema-registry-client</artifactId>
+				<version>${version.confluent}</version>
+			</dependency>
+
+
+			<dependency>
+				<groupId>io.confluent</groupId>
+				<artifactId>kafka-avro-serializer</artifactId>
+				<version>${version.confluent}</version>
+				<exclusions>
+					<exclusion>
+						<groupId>org.slf4j</groupId>
+						<artifactId>slf4j-log4j12</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>log4j</groupId>
+						<artifactId>log4j</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>io.swagger</groupId>
+						<artifactId>swagger-annotations</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>io.swagger</groupId>
+						<artifactId>swagger-core</artifactId>
+					</exclusion>
+				</exclusions>
+			</dependency>
+
+
+			<dependency>
+				<groupId>io.confluent</groupId>
+				<artifactId>monitoring-interceptors</artifactId>
+				<version>${version.confluent}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.springframework.boot</groupId>
@@ -49,6 +170,12 @@
 				<artifactId>config-services</artifactId>
 				<version>${version.project}</version>
 			</dependency>
+			<dependency>
+				<groupId>com.example</groupId>
+				<artifactId>kafka-config</artifactId>
+				<version>${version.project}</version>
+			</dependency>
+
 			<dependency>
 				<groupId>org.apache.avro</groupId>
 				<artifactId>avro</artifactId>
@@ -76,6 +203,11 @@
 				<version>${twitter4j.version}</version>
 			</dependency>
 			<dependency>
+				<groupId>org.springframework.cloud</groupId>
+				<artifactId>spring-cloud-starter-netflix-eureka-server</artifactId>
+				<version>${spring-cloud-starter-config.version}</version>
+			</dependency>
+			<dependency>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-starter-test</artifactId>
 				<version>${spring-boot.version}</version>
@@ -101,12 +233,37 @@
 				</configuration>
 			</plugin>
 		</plugins>-->
+
+<!--		CTRL+SHIFT+O ==>RELOAD
+		ALT+CTRL+V ==>ADD VERTION OF DEP TO PROPERTIES SECTION-->
+
 		<pluginManagement>
 			<plugins>
 				<plugin>
 					<groupId>org.springframework.boot</groupId>
 					<artifactId>spring-boot-maven-plugin</artifactId>
 					<version>${spring-boot.version}</version>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.avro</groupId>
+					<artifactId>avro-maven-plugin</artifactId>
+					<version>${avro.version}</version>
+					<executions>
+						<execution>
+							<phase>generate-sources</phase>
+							<goals>
+								<goal>schema</goal>
+								<goal>protocol</goal>
+								<goal>idl-protocol</goal>
+							</goals>
+							<configuration>
+								<sourceDirectory>${project.basedir}/src/main/resources/avro</sourceDirectory>
+								<targetDirectory>${project.basedir}/src/main/java/</targetDirectory>
+								<stringType>String</stringType>
+								<createSetters>true</createSetters>
+							</configuration>
+						</execution>
+					</executions>
 				</plugin>
 			</plugins>
 		</pluginManagement>
