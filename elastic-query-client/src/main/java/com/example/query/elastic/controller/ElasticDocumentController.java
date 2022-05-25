@@ -3,20 +3,26 @@ import com.example.model.TwitterIndexModel;
 import com.example.query.elastic.services.TwitterElasticSearchQueryClientService;
 import com.example.services.TwitterElasticSearchServices;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.security.oauth2.resource.OAuth2ResourceServerProperties;
 import org.springframework.http.MediaType;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.annotation.security.RolesAllowed;
 import java.util.List;
 /**
  * Created By: Ali Mohammadi
  * Date: 13 Apr, 2022
  */
 @RestController
+
 @RequestMapping(value = "/documents")
 public class ElasticDocumentController {
+
   public ElasticDocumentController(TwitterElasticSearchQueryClientService queryClientService) {
     this.queryClientService = queryClientService;
   }
@@ -30,8 +36,9 @@ public class ElasticDocumentController {
     return queryClientService.getIndexModelById( id );
   }
   @GetMapping(value = "/document-text/{text}",produces = MediaType.APPLICATION_JSON_VALUE)
-  
+  @RolesAllowed("admin")
   public List<TwitterIndexModel> findDocumentByText(@PathVariable("text") String text){
+    
     return queryClientService.getIndexModelByText( text );
   }
 }
