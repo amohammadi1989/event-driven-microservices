@@ -1,8 +1,18 @@
-version: '2'
+version: '3.7'
+volumes:
+  mysql_data:
+    driver: local
 services:
+  redis:
+    image: redis:latest
+    hostname: redis
+    restart: always
+    ports:
+      - '6379:6379'
   elasticsearch:
     container_name: elasticsearch2
     image: elasticsearch:8.1
+    hostname: elasticsearch
     ports:
       - 9200:9200
       - 9300:9300
@@ -27,9 +37,10 @@ services:
       ZOOKEEPER_TICK_TIME: 2000
     ports:
       - 2181:2181
-  kafka:
+  kafka-broker:
     image: kafka:latest
     restart: always
+    hostname: kafka-broker
     depends_on:
       - zookeeper
     ports:
@@ -37,53 +48,151 @@ services:
     environment:
       KAFKA_BROKER_ID: 1
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092,PLAINTEXT_HOST://localhost:29092
-      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka-broker:9092,LISTENER_LOCAL://localhost:29092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,LISTENER_LOCAL:PLAINTEXT
       KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
   schemaregistry:
     image: schema-registry:6.0.5
+    hostname: schemaregistry
     restart: always
     depends_on:
       - zookeeper
     environment:
       SCHEMA_REGISTRY_KAFKASTORE_CONNECTION_URL: "zookeeper:2181"
       SCHEMA_REGISTRY_HOST_NAME: schemaregistry
-      SCHEMA_REGISTRY_LISTENERS: "http://0.0.0.0:8085"
+      SCHEMA_REGISTRY_LISTENERS: "http://schemaregistry:8085"
     ports:
       - 8085:8085
-  kafka-manager:
-    image: kafka-mamager:3.0
-    restart: always
+  storage:
+    image: openzipkin/zipkin-mysql:latest
+    container_name: mysql
+  zipkin:
+    image: openzipkin/zipkin
+    hostname: zipkin
+    container_name: zipkin
+    environment:
+      STORAGE_TYPE: mysql
+      MYSQL_HOST: storage
+      MYSQL_USER: zipkin
+      MYSQL_PASS: zipkin
+      JAVA_OPTS: -Dlogging.level.zipkin2=DEBUG
+      KAFKA_BOOTSTRAP_SERVERS: kafka-broker:9092
+    ports:
+      - 9411:9411
     depends_on:
-      - zookeeper
-    environment:
-      ZK_SERVER: "zookeeper:2181"
-    ports:
-      - 9000:9000
-  keycloak-db:
-    container_name: keycloak-db
-    image: mysql:8.0.23
-    ports:
-      - "3306:3306"
-    environment:
-      MYSQL_ROOT_PASSWORD: root
-      MYSQL_DATABASE: keycloak
-      MYSQL_USER: keycloak
-      MYSQL_PASSWORD: 123456
+      - storage
   keycloak:
-    container_name: keycloak
-    image: keyclock:latest
-    ports:
-      - "8443:8443"
+    image: jboss/keycloak:latest
+    hostname: keycloak
     environment:
-      DB_VENDOR: MYSQL
-      DB_ADDR: 172.0.0.1
-      DB_PORT: 3306
-      DB_DATABASE: keycloak
-      DB_USER: keycloak
-      DB_PASSWORD: 123456
+      DB_VENDOR: H2
       KEYCLOAK_USER: admin
       KEYCLOAK_PASSWORD: admin
+      KEYCLOAK_IMPORT: /temp/realm-export.json
+    volumes:
+      - type: bind
+        source: ./realm-export.json
+        target: /temp/realm-export.json
+      - type: bind
+        source: ./docker-entrypoints.sh
+        target: /temp/docker-entrypoints.sh
+      - type: bind
+        source: ./add-role-to-realm.sh
+        target: /opt/jboss/keycloak/bin/add-role-to-realm.sh
+    ports:
+      - 8080:8080
+    entrypoint:  "./temp/docker-entrypoints.sh"
+  configserver:
+    image: config-server:1.0
+    hostname: configserver
+    environment:
+      JAVA_OPTS: "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5007 -Xms128m -Xmx256m"
+      SERVER_PORT: "8888"
+      SPRING_ZIPKIN_BASE_URL: "http://zipkin:9411"
+      LOG_APP-NAME: "config-server"
+    ports:
+      - "5007:5007"
+      - "8888:8888"
+  batch:
+    image: batch-to-kafka-services:1.0
+    hostname: batch-service
+    environment:
+      JAVA_OPTS: "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5009 -Xms128m -Xmx256m"
+      SERVER_PORT: "84"
+      KAFKA-CONFIG_SCHEMA-REGISTRY-URL-KEY: schema.registry.url
+      KAFKA-CONFIG_SCHEMA-REGISTRY-URL: "http://schemaregistry:8085"
+      KAFKA-CONFIG_BOOTSTRAP-SERVERS: kafka-broker:9092
+      KAFKA-CONFIG_BATCH-SIZE: 16384
+      KAFKA-CONFIG_BATCH-SIZE-BOOST-FACTOR: 100
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka-broker:9092
+      SPRING_KAFKA_PROPERTIES_SCHEMA_REGISTRY_URL: "http://schemaregistry:8085"
+      SPRING_CLOUD_CONFIG_URI: "http://configserver:8888"
+      LOG_APP-NAME: "batch-to-kafka-services"
+    ports:
+      - "5009:5009"
+      - "84:84"
+    restart: on-failure
     depends_on:
-      - keycloak-db
+      - configserver
+    links:
+      - configserver
+  server-registry:
+    image: service-registry:1.0
+    hostname: server-registry
+    environment:
+      JAVA_OPTS: "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5008 -Xms128m -Xmx256m"
+      SERVER_PORT: "8761"
+      SPRING_ZIPKIN_BASE_URL: "http://zipkin:9411"
+      SPRING_CLOUD_CONFIG_URI: "http://configserver:8888"
+      LOG_APP-NAME: "server-registry"
+    ports:
+      - "5008:5008"
+      - "8761:8761"
+  kafka-to-elastic:
+    image: kafka-to-elastic-services:1.0
+    hostname: kafka-to-elastic
+    restart: on-failure
+    ports:
+    - "5006:5006"
+    - "85:85"
+    environment:
+      JAVA_OPTS: "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5006 -Xms128m -Xmx256m"
+      SERVER_PORT: "85"
+      SPRING_CLOUD_CONFIG_URI: "http://configserver:8888"
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka-broker:9092
+      SPRING_ZIPKIN_BASE_URL: "http://zipkin:9411"
+      ELASTIC-CONFIG_INDEX-NAME: twitter-index
+      ELASTIC-CONFIG_CONNECTION-URL: "http://elasticsearch:9200"
+      ELASTIC_CONFIG_CONNECTION_URL: "http://elasticsearch:9200"
+      ELASTIC_CONFIG_CONNECT_TIMEOUT_MS: 5000
+      EKASTIC_CONFIG_SOCKET_TIMEOUT_MS: 30000
+      ELASTIC_CONFIG_INDEX_NAME: twitter-index
+      LOG_APP-NAME: "kafka-to-elastic-services"
+    depends_on:
+      - kafka-broker
+      - zipkin
+      - configserver
+      - elasticsearch
+  gateway-services:
+    image: gateway-services:1.0
+    hostname: gateway-services
+    restart: on-failure
+    environment:
+      SERVER_PORT: 80
+      SPRING_REDIS_HOST: redis
+      LOG_APP-NAME: gateway-service-2
+      EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE: http://server-registry:8761/eureka/
+      SPRING_SLEUTH_SAMPLER_PROBABILITY: 1.0
+    ports:
+    - 80:80
+  elastic-query-client:
+    image: elastic-query-client:1.0
+    hostname: elastic-query-client
+    environment:
+      SPRING_ZIPKIN_KAFKA_TOPIC: zipkin
+      SPRING_ZIPKIN_SENDER_TYPE: kafka
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka-broker:9092
+      SPRING_SLEUTH_SAMPLER_PROBABILITY: 1.0
+    ports:
+    - 82:82
